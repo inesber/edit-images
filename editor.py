@@ -50,6 +50,41 @@ class Editor:
             font=font,
             fill=(255, 0, 0, 100))
 
+    def make_ascii(self):
+        font_size = 10
+        letters = [" ", ".", "!", "i", "u", "r", "e", "p", "S", "H"]
+
+        (w, h) = self.img.size
+
+        new_width = int(w / font_size)
+        new_height = int(h / font_size)
+
+        sample_size = (new_width, new_height)
+        final_size = (new_width * font_size, new_height * font_size)
+
+        self.grayscale()
+        self.change_contrast(5.0)
+        self.img = self.img.resize(sample_size)
+
+        ascii_img = Image.new("RGBA", final_size, color="#aa4465")
+
+        font = ImageFont.truetype("ibm-plex-mono.ttf", font_size)
+        drawer = ImageDraw.Draw(ascii_img)
+
+        for x in range(new_width):
+            for y in range(new_height):
+                (r, g, b, a) = self.img.getpixel((x, y))
+
+                bright = r / 256
+                letter_num = int(len(letters) * bright)
+                letter = letters[letter_num]
+
+                position = (x * font_size, y * font_size)
+                drawer.text(position, letter, font=font,
+                            fill=(255, 255, 255, 255))
+
+        self.img = ascii_img
+
     def save(self, output_filepath):
         print("Your image was saved!")
 
@@ -59,18 +94,19 @@ class Editor:
         self.img.save(output_filepath)
 
 
-inputs = glob.glob("inputs/*.jpg")
+if __name__ == "__main__":
+    inputs = glob.glob("inputs/*.jpg")
 
-os.makedirs("results", exist_ok=True)
+    os.makedirs("results", exist_ok=True)
 
-for filepath in inputs:
-    output = filepath.replace("inputs", "results")
-    image = Editor(filepath)
-#    image.change_contrast()
-#    image.grayscale()
-#    image.invert_horizontal()
-#    image.make_thumbnail((300, 300))
-#    image.square_image()
-#    image.write_on_image()
-    image.make_ascii()
-    image.save(output)
+    for filepath in inputs:
+        output = filepath.replace("inputs", "results")
+        image = Editor(filepath)
+    #    image.change_contrast()
+    #    image.grayscale()
+    #    image.invert_horizontal()
+    #    image.make_thumbnail((300, 300))
+    #    image.square_image()
+    #    image.write_on_image()
+        image.make_ascii()
+        image.save(output)
